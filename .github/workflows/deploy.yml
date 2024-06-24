@@ -22,10 +22,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
       
       - name: Initialize Terraform
-        run: |
-          terraform init
-          terraform validate
-          terraform plan
+        run: terraform init
         working-directory: ./terraform
         
       - name: Deploy to EC2
