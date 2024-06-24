@@ -1,0 +1,36 @@
+name: Stopping the Application
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch:
+  
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up terraform
+        run: hashicorp/setup-terraform@v1
+      
+      - name: Initialize Terraform
+        run: |
+          terraform init
+          terraform validate
+          terraform plan
+        working-directory: ./terraform
+        
+      - name: Deploy to EC2
+        run: terraform destroy -auto-approve
+        working-directory: ./terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
