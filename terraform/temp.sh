@@ -45,19 +45,4 @@ sudo chmod +x env_generator.sh
 ./env_generator.sh
 
 npm install 
-
-
-# Create a simple server script
-echo "const strapi = require('@strapi/strapi'); strapi().start();" | sudo tee server.js
-
-# Start the Strapi server using PM2
-sudo pm2 start server.js --name strapi
-
-# Save the PM2 process list
-sudo pm2 save
-
-# Generate and configure the PM2 startup script
-sudo pm2 startup
-
-# List PM2 processes to confirm Strapi is running
-sudo pm2 list
+pm2 start npm --name "strapi" -- run develop
