@@ -7,6 +7,33 @@ terraform {
   }
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent =true
+  owners = ["amazon"]
+  filter {
+    name = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-*"]
+  }
+  filter{
+    name = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter{
+    name = "root-device-type"
+    values= ["ebs"]
+  }
+}
+
+resource "tls_private_key" "key_generator" {
+  algorithm = "RSA"
+  rsa_bits = 2048
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name = "deployer-key"
+  public_key = tls_private_key.key_generator.public_key_openssh
+}
+
 provider "aws" {
   region = var.aws_region
 }
@@ -74,24 +101,24 @@ resource "aws_security_group" "all" {
   }
 }
 
-# resource "aws_s3_bucket" "s3_bucket" {
-#   bucket = "harshit-s3-bucket"
-# }
+resource "aws_s3_object" "saving_key" {
+  bucket = var.s3
+  key    = "key/key_generator.pem"
+  content = tls_private_key.key_generator.private_key_openssh
+}
 
 resource "aws_instance" "my-instance" {
-  ami                         = var.ami_name
+  ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.aws_subnet1.id
   vpc_security_group_ids      = [aws_security_group.all.id]
-  key_name = var.key_name
+  key_name = aws_key_pair.deployer.key_name
   associate_public_ip_address = true
   user_data = file("temp.sh")
 
   root_block_device {
         volume_size = 10
     }
-
-  
 }
 
 output "my_instance_public_ip" {
