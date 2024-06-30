@@ -1,20 +1,18 @@
 variable "aws_region" {
   description = "The Name of the regin"
+  type = string
   default = "ap-south-1"
 }
 
 variable "instance_type" {
   description = "The type of instance"
+  type = string
   default = "t2.small"
 }
 
-variable "key_name" {
-  description = "The name of the ssh key"
-  default = "ex"
-}
 
-variable "ami_name" {
-    description = "The name of the ami"
-    default = "ami-05e00961530ae1b55"
+variable "s3" {
+  description = "S3 Bucket Name"
+  type = string
+  default = "851725297111"
 }
-
