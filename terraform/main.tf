@@ -8,29 +8,29 @@ terraform {
 }
 
 data "aws_ami" "ubuntu" {
-  most_recent =true
-  owners = ["amazon"]
+  most_recent = true
+  owners      = ["amazon"]
   filter {
-    name = "name"
+    name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-*"]
   }
-  filter{
-    name = "virtualization-type"
+  filter {
+    name   = "virtualization-type"
     values = ["hvm"]
   }
-  filter{
-    name = "root-device-type"
-    values= ["ebs"]
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 }
 
 resource "tls_private_key" "key_generator" {
   algorithm = "RSA"
-  rsa_bits = 2048
+  rsa_bits  = 2048
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name = "deployer-key"
+  key_name   = "deployer-key"
   public_key = tls_private_key.key_generator.public_key_openssh
 }
 
@@ -74,14 +74,14 @@ resource "aws_security_group" "all" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow SSH from anywhere (not recommended for production)
+    cidr_blocks = ["0.0.0.0/0"] # Allow SSH from anywhere (not recommended for production)
   }
 
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP from anywhere
+    cidr_blocks = ["0.0.0.0/0"] # Allow HTTP from anywhere
   }
 
 
@@ -92,18 +92,25 @@ resource "aws_security_group" "all" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow HTTPS from anywhere
+  }
+
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 }
 
 resource "aws_s3_object" "saving_key" {
-  bucket = var.s3
-  key    = "key/key_generator.pem"
+  bucket  = var.s3
+  key     = "key/key_generator.pem"
   content = tls_private_key.key_generator.private_key_openssh
 }
 
@@ -112,13 +119,21 @@ resource "aws_instance" "my-instance" {
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.aws_subnet1.id
   vpc_security_group_ids      = [aws_security_group.all.id]
-  key_name = aws_key_pair.deployer.key_name
+  key_name                    = aws_key_pair.deployer.key_name
   associate_public_ip_address = true
-  user_data = file("temp.sh")
+  user_data                   = file("temp.sh")
 
   root_block_device {
-        volume_size = 10
-    }
+    volume_size = 10
+  }
+}
+
+resource "aws_route53_record" "subdomain" {
+  zone_id = var.route53_zone_id
+  name = var.subdomain
+  type = "A"
+  ttl = "300"
+  records = [aws_instance.my-instance.public_ip]
 }
 
 output "my_instance_public_ip" {
