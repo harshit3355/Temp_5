@@ -22,3 +22,14 @@ variable "s3" {
   description = "S3 Bucket Name"
   type        = string
 }
+
+variable "docker_hub_username" {
+  description = "Docker Hub Username"
+  type        = string
+}
+
+variable "docker_hub_password" {
+  description = "Docker Hub Password"
+  type        = string
+  sensitive   = true
+}
