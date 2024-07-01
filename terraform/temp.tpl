@@ -55,7 +55,7 @@ sudo docker run -d --name strapi-container -p 1337:1337 -v strapi-data:/srv/stra
 cat <<EOF | sudo tee /etc/nginx/sites-available/default
 server {
     listen 80;
-    server_name admin.technobizz.biz;
+    server_name harshit.technobizz.biz;
 
     location / {
         proxy_pass http://localhost:1337;
@@ -72,22 +72,22 @@ EOF
 sudo systemctl restart nginx
 
 # Obtain SSL certificate using Let's Encrypt
-sudo certbot --nginx -d admin.technobizz.biz --non-interactive --agree-tos -m harshitnagila555@gmail.com
+sudo certbot --nginx -d harshit.technobizz.biz --non-interactive --agree-tos -m harshitnagila555@gmail.com
 
 # Enable SSL in NGINX
 cat <<EOF | sudo tee /etc/nginx/sites-available/default
 server {
     listen 80;
-    server_name admin.technobizz.biz;
+    server_name harshit.technobizz.biz;
     return 301 https://\$host\$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name admin.technobizz.biz;
+    server_name harshit.technobizz.biz;
 
-    ssl_certificate /etc/letsencrypt/live/admin.technobizz.biz/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/admin.technobizz.biz/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/harshit.technobizz.biz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/harshit.technobizz.biz/privkey.pem;
 
     location / {
         proxy_pass http://localhost:1337;
