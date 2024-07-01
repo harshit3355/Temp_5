@@ -24,7 +24,7 @@ jobs:
       - name: Initialize Terraform
         run: | 
           terraform init
-          terraform valdiate
+          terraform validate
           terraform plan
         working-directory: ./terraform
         env:
