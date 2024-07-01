@@ -121,7 +121,10 @@ resource "aws_instance" "my-instance" {
   vpc_security_group_ids      = [aws_security_group.all.id]
   key_name                    = aws_key_pair.deployer.key_name
   associate_public_ip_address = true
-  user_data                   = file("temp.sh")
+  user_data                   = templatefile("${path.module}/temp.tpl", {
+                                docker_hub_username = var.docker_hub_username
+                                docker_hub_password = var.docker_hub_password
+                              })
 
   root_block_device {
     volume_size = 10
